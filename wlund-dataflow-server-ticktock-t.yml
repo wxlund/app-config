@@ -1,0 +1,4 @@
+app:
+    time:
+        trigger:
+	    fixed-delay: 5
