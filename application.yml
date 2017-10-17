@@ -1,21 +1,54 @@
-security:
-  basic:
-    enabled: false
-
-management:
-  security:
-    enabled: false
-
+---
+info:
+  application: RentMe connected trucks Demo
+  show: Spring One 2GX 2015
+  
 logging:
   level:
-    io:
-      pivotal: DEBUG
-      
-      spring: # <---NEW SECTION
-  
-  cloud:
-    services:
-      registrationMethod: direct
+    com.netflix.discovery: 'OFF'
 
-ribbon: # <---NEW SECTION
-  IsSecure: false      
+endpoints:
+  restart: enabled
+  health:
+	sensitive: false
+	
+eureka:
+  instance:
+    leaseRenewalIntervalInSeconds: 10
+  client:
+    region: default
+    registryFetchIntervalSeconds: 5
+
+ribbon:
+  ServerListRefreshInterval: 5000
+
+hystrix.command.default.execution.isolation.strategy: SEMAPHORE
+
+---
+spring:
+  profiles: cloud
+eureka:
+  instance:
+    hostname: ${vcap.application.uris[0]:localhost}
+    nonSecurePort: 80
+    metadataMap:
+      instanceId: ${vcap.application.instance_id:${spring.application.name}:${spring.application.instance_id:${server.port}}}
+  client:
+    serviceUrl:
+      defaultZone: ${vcap.services.${PREFIX:}eureka.credentials.uri:http://${PREFIX:}eureka.${APPLICATION_DOMAIN:cfapps.io}}/eureka/
+
+---
+spring:
+  profiles: dev
+eureka:
+  instance:
+    nonSecurePortEnabled: true
+    securePortEnabled: false
+
+---
+spring:
+  profiles: local
+eureka:
+  instance:
+    nonSecurePort: ${server.port}
+
